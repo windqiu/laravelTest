@@ -25,7 +25,7 @@ class LogController extends Controller
      * @author: windqiu
      * @time: 2024/11/1820:12
      */
-    public function page(Request $request)
+    public function page()
     {
         $res = $this->sqlLogModel->paginate(10);
         return view('page', ['data' => $res]);
