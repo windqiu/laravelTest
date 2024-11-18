@@ -18,10 +18,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-
+//进入登录页
 Route::get('/dev', [UserController::class, 'index']);
+//登录提交接口
 Route::post('/login', [UserController::class, 'login']);
+//登录验证
 Route::middleware('login_auth')->group(function () {
+    //展示sql日志页面
     Route::get('/page', [LogController::class, 'page']);
+    //提交sql验证接口
     Route::post('/addSql', [LogController::class, 'submitSql']);
 });
