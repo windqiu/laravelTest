@@ -42,7 +42,7 @@ class LogController extends Controller
     {
         $sql = $request->post('sql');
         if (empty($sql) || !str_contains(strtolower($sql), 'select')) {
-            return response()->json(['code' => -1, 'msg' => 'sql为空或 非select sql不被允许']);
+            return $this->resultResponse('sql为空或 非select sql不被允许', -1);
         }
 
         $record = [
@@ -58,7 +58,6 @@ class LogController extends Controller
         } finally {
             $this->sqlLogModel->addSql($record);
         }
-
-        return response()->json(['code' => 0, 'msg' => 'sql提交成功', 'data' => []]);
+        return $this->resultResponse('sql提交成功');
     }
 }
