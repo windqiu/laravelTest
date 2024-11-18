@@ -9,6 +9,18 @@
     <meta name="robots" content="all,follow">
     <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/4.2.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ 'Bootstrap/css/style.default.css' }}" id="theme-stylesheet">
+    <style>
+        table {
+            width: 100%;
+            table-layout: auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
 <div class="page login-page">
@@ -20,14 +32,29 @@
 </div>
 <hr>
 <div class="container">
-    <ul>
-        @foreach($data as $sql)
-            <li>用户名：{{$sql->username}}, SQL语句：{{$sql->sql}}, 执行时间：{{$sql->create_at}}, 执行信息：{{$sql->error}}</li>
-        @endforeach
-    </ul>
+    <table>
+        <thead>
+        <tr>
+            <th>用户名</th>
+            <th>SQL语句</th>
+            <th>执行时间</th>
+            <th>执行结果</th>
+        </tr>
+        </thead>
+        <tbody>
 
+        @foreach($data as $sql)
+        <tr>
+            <td>{{$sql->username}}</td>
+            <td>{{$sql->sql}}</td>
+            <td>{{$sql->create_at}}</td>
+            <td>{{$sql->error}}</td>
+        </tr>
+        @endforeach
+        </tbody>
+    </table>
+    {{$data->links()}}
 </div>
-{{$data->links()}}
 <!-- JavaScript files-->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="{{ 'Bootstrap/js/bootstrap.min.js' }}"></script>

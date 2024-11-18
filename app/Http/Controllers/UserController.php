@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SqlLog;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
@@ -35,13 +35,18 @@ class UserController extends Controller
         if (empty($username) || empty($password)) {
             return $this->resultResponse('参数不合法', -1);
         }
-
         //判断用户是否存在
-        $isExists = $this->userModel->isExist($username, md5($password));
-        if (!$isExists) {
+        $isExist = $this->userModel->isExist($username, md5($password));
+        if (!$isExist) {
             return $this->resultResponse('用户不存在', -1);
         }
-
+        //查询用户信息
+        $userInfo = $this->userModel->getUserInfo($username);
+        if (empty($userInfo)) {
+            return $this->resultResponse('用户为空', -1);
+        }
+        //模拟单用户时记录用户信息，设置120s
+        Cache::set('user', json_encode($userInfo), 120);
         return $this->resultResponse();
     }
 }

@@ -5,12 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\SqlLog;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class LogController extends Controller
 {
+    private $user;
     public function __construct(private SqlLog $sqlLogModel)
     {
+        $userInfoJson = Cache::get('user');
+        $this->user = json_decode($userInfoJson, true);
     }
 
     /**
@@ -38,8 +44,9 @@ class LogController extends Controller
         if (empty($sql) || !str_contains(strtolower($sql), 'select')) {
             return response()->json(['code' => -1, 'msg' => 'sql为空或 非select sql不被允许']);
         }
+
         $record = [
-            'username' => 'unknown',
+            'username' => $this->user['username'] ?? 'unknown',
             'sql' => $sql,
             'create_at' => date('Y-m-d H:i:s'),
             'error' => 'success'

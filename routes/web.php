@@ -21,5 +21,7 @@ Route::get('/', function () {
 
 Route::get('/dev', [UserController::class, 'index']);
 Route::post('/login', [UserController::class, 'login']);
-Route::get('/page', [LogController::class, 'page']);
-Route::post('/addSql', [LogController::class, 'submitSql']);
+Route::middleware('login')->group(function () {
+    Route::get('/page', [LogController::class, 'page']);
+    Route::post('/addSql', [LogController::class, 'submitSql']);
+});
