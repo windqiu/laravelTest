@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\LogController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +18,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/dev', [UserController::class, 'index']);
+Route::post('/login', [UserController::class, 'login']);
+Route::get('/page', [LogController::class, 'page']);
+Route::post('/addSql', [LogController::class, 'submitSql']);

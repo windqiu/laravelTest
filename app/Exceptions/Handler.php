@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -23,8 +24,21 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        $this->reportable(function (Throwable $e) {
-            //
-        });
+    }
+
+    public function render($request, Throwable $e)
+    {
+        $response = [
+            'code' => -1,
+            'msg' => $e->getMessage(),
+            'data' => [],
+        ];
+
+        // 如果是生产环境，可以隐藏详细的错误信息
+        if (app()->isProduction()) {
+            $response['msg'] = '服务器内部错误，请稍后再试。';
+        }
+        Log::channel('errorlog')->error($e->getMessage());
+        return response()->json($response);
     }
 }

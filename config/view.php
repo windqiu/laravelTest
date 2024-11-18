@@ -33,4 +33,8 @@ return [
         realpath(storage_path('framework/views'))
     ),
 
+    'pagination' => [
+        'view' => 'pagination',
+        // ...
+    ],
 ];

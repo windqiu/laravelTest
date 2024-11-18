@@ -3,43 +3,37 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Hash;
+
+class User extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    protected $table = 'users';
+    /**
+     * Notes: 查询用户是否存在
+     * @param string $username 用户名
+     * @param string $password 密码
+     * @return bool
+     * @author: windqiu
+     * @time: 2024/11/1813:17
+     */
+    public function isExist(string $username, string $password): bool
+    {
+        return $this->where(['username' => $username, 'password' => $password])->exists();
+    }
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Notes: 获取用户信息
+     * @param $username
+     * @return array
+     * @author: windqiu
+     * @time: 2024/11/1813:18
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    public function getUserInfo($username): array
+    {
+        $info = $this->where('username', $username)->firstWhere('username', $username);
+        return $info->toArray();
+    }
 }
