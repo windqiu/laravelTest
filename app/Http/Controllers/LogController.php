@@ -2,21 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SqlLog;
-use Exception;
+use App\Http\Logic\LogLogic;
+use App\Triats\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class LogController extends Controller
 {
-    private $user;
-    public function __construct(private SqlLog $sqlLogModel)
+    use ApiResponse;
+
+    private LogLogic $logLogic;
+    public function __construct()
     {
-        $userInfoJson = Cache::get('user');
-        $this->user = json_decode($userInfoJson, true);
+        $this->logLogic = new LogLogic();
     }
 
     /**
@@ -27,7 +25,7 @@ class LogController extends Controller
      */
     public function page()
     {
-        $res = $this->sqlLogModel->paginate(10);
+        $res = $this->logLogic->getListPaginate();
         return view('page', ['data' => $res]);
     }
 
@@ -40,24 +38,44 @@ class LogController extends Controller
      */
     public function submitSql(Request $request)
     {
-        $sql = $request->post('sql');
-        if (empty($sql) || !str_contains(strtolower($sql), 'select')) {
-            return $this->resultResponse('sql为空或 非select sql不被允许', -1);
-        }
+        $params = $request->all();
+        $validator = Validator::make($params, [
+            'sql' => 'required',
+        ], [
+            'sql.required' => 'sql参数必传',
+        ]);
 
-        $record = [
-            'username' => $this->user['username'] ?? 'unknown',
-            'sql' => $sql,
-            'create_at' => date('Y-m-d H:i:s'),
-            'error' => 'success'
-        ];
-        try {
-            DB::select($sql);
-        } catch (Exception $e) {
-            $record['error'] = $e->getMessage();
-        } finally {
-            $this->sqlLogModel->addSql($record);
+        if ($validator->fails()) {
+            return $this->errorResponse('sql log params error', $validator->errors()->all()[0]);
         }
-        return $this->resultResponse('sql提交成功');
+        //验证参数
+        $this->logLogic->submitSql($params, $request->userInfo);
+        return $this->successResponse('sql提交成功');
+    }
+
+    /**
+     * Notes: 提交sql数据
+     * @param Request $request
+     * @author: windqiu
+     * @time: 2024/11/1820:12
+     */
+    public function exportSql(Request $request)
+    {
+        $params = $request->all();
+        $validator = Validator::make($params, [
+            'sql' => 'required',
+            'type' => 'required|in:json,excel'
+        ], [
+            'type.required' => 'type参数必传',
+            'type.in' => 'type导出类型错误',
+            'sql.required' => 'sql参数必传',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('sql log params error', $validator->messages());
+        }
+        //验证参数，导出文件类型与sql
+        $res = $this->logLogic->exportSql($params, $request->userInfo);
+        return $res;
     }
 }

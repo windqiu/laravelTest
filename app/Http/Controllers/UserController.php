@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Logic\UserLogic;
 use App\Models\User;
+use App\Triats\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-    public function __construct(private User $userModel)
+    use ApiResponse;
+
+    public function __construct(private UserLogic $userLogic)
     {
     }
 
@@ -30,23 +35,19 @@ class UserController extends Controller
      */
     public function login(Request $request)
     {
-        $username = $request->post('username');
-        $password = $request->post('password');
-        if (empty($username) || empty($password)) {
-            return $this->resultResponse('参数不合法', -1);
+        $params = $request->all();
+        $validator = Validator::make($params, [
+            'username' => 'required',
+            'password' => 'required'
+        ], [
+            'username.required' => 'username参数必传',
+            'password.required' => 'password参数必传',
+        ]);
+        if ($validator->fails()) {
+            return $this->errorResponse('sql log params error', $validator->messages());
         }
-        //判断用户是否存在
-        $isExist = $this->userModel->isExist($username, md5($password));
-        if (!$isExist) {
-            return $this->resultResponse('用户不存在', -1);
-        }
-        //查询用户信息
-        $userInfo = $this->userModel->getUserInfo($username);
-        if (empty($userInfo)) {
-            return $this->resultResponse('用户为空', -1);
-        }
-        //模拟单用户时记录用户信息，设置120s
-        Cache::set('user', json_encode($userInfo), 120);
+
+        $this->userLogic->loginUser($params);
         return $this->resultResponse();
     }
 }

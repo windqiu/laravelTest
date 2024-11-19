@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,4 +30,11 @@ Route::middleware('login_auth')->group(function () {
     Route::get('/page', [LogController::class, 'page']);
     //提交sql验证接口
     Route::post('/addSql', [LogController::class, 'submitSql']);
+    //导出，复用接口导出 excel & json
+    Route::get('/exportSql', [LogController::class, 'exportSql']);
+});
+
+//心跳检测
+Route::get('/health', function () {
+    return time();
 });

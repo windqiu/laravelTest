@@ -18,6 +18,7 @@ class Auth
     public function handle(Request $request, Closure $next): Response
     {
         if (Cache::has('user')) {
+            $request->userInfo = json_decode(Cache::get('user'), true);
             return $next($request);
         }
         return redirect('/dev');

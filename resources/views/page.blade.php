@@ -28,6 +28,8 @@
         <label for="sql-input">SQL语句:</label>
         <input type="text" id="sql-input" name="sql" required>
         <button type="button" id="submitSql">Execute</button>
+        <button type="button" id="exportExcel">Export Excel</button>
+        <button type="button" id="exportJson">Export Json</button>
     </form>
 </div>
 <hr>
@@ -64,20 +66,73 @@
         /*提交sql*/
         $("#submitSql").click(function(){
             var sqlInput=$("#sql-input").val();
-            if (!/^select\s/i.test(sqlInput)) {
-                alert('只允许执行SELECT语句！');
+            if (! checkSql(sqlInput)) {
+                //校验sql语句合法性
                 return;
             }
             $.post('addSql',{"sql":sqlInput},function(res){
                 console.log(res);
-                if (res.code != 0) {
+                if (!res.status) {
                     alert(res.msg)
                     return;
                 }
                 location.reload();
             })
         })
+
+        //导出执行sql结果为excel
+        $("#exportExcel").click(function(){
+            var sqlInput=$("#sql-input").val();
+            if (! checkSql(sqlInput)) {
+                //校验sql语句合法性
+                return;
+            }
+            $.post('export',{"sql":sqlInput, "type": "excel"},function(res){
+                console.log(res);
+                // if (!res.status) {
+                //     alert(res.message);
+                //     return;
+                // }
+
+                // var a = document.createElement('a');
+                // a.download = res.data.file_name
+                // a.href = res.data.path + '/' +res.data.file_name;
+                // a.target = '_blank';
+                // a.click()
+                // location.href = res.data.path + '/' +res.data.file_name;
+                // console.log(location.href)
+                // const SERVER_PATH = `${window.location.origin}`;
+                // const alink = document.createElement('a');
+                // alink.style.display = 'none'
+                // alink.href = `${SERVER_PATH}` + res.data.path + '/' +res.data.file_name;
+                // alink.download = '';
+                //
+                // document.body.appendChild(alink)
+                // alink.click();
+                // URL.revokeObjectURL(alink.href) // 释放URL 对象
+                // document.body.removeChild(alink)
+            })
+        })
+        //导出执行sql结果为 json
+        // $("#exportJson").click(function(){
+        //     var sqlInput=$("#sql-input").val();
+        //     if (! checkSql(sqlInput)) {
+        //         //校验sql语句合法性
+        //         return;
+        //     }
+        //     $.get('export',{"sql":sqlInput, "type": "json"},function(res){
+        //         document.createElement('a');
+        //     })
+        // })
     })
+
+    function checkSql(sqlInput) {
+        if (!/^select\s/i.test(sqlInput)) {
+            alert('只允许执行SELECT语句！');
+            return false;
+        }
+        return true;
+    }
 </script>
 </body>
 </html>
